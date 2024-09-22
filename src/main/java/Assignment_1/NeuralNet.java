@@ -12,7 +12,6 @@ public class NeuralNet {
     private double lowerBound;               // Lower bound for random weight initialization
     private double upperBound;               // Upper bound for random weight initialization
     private List<double[][]> weights;        // List of weight matrices between layers
-    private List<double[]> biases;           // List of bias vectors for each layer
 
     public NeuralNet(int numInputs, List<Integer> hiddenNeurons, int numOutputs, double lowerBound, double upperBound) {
         this.numInputs = numInputs;
@@ -22,18 +21,17 @@ public class NeuralNet {
         this.lowerBound = lowerBound;
         this.upperBound = upperBound;
         this.weights = new ArrayList<>();
-        this.biases = new ArrayList<>();
 
         // Initialize weights and biases
-        initializeWeightsAndBiases();
+        initializeWeights();
     }
 
     // Method to initialize weights and biases
-    private void initializeWeightsAndBiases() {
+    private void initializeWeights() {
         Random random = new Random();
 
         // Step 1: Initialize weights and biases between input layer and first hidden layer
-        int previousLayerNeurons = numInputs;
+        int previousLayerNeurons = numInputs + 1;
 
         // Loop through each hidden layer
         for (int i = 0; i < numHiddenLayers; i++) {
@@ -48,15 +46,8 @@ public class NeuralNet {
             }
             weights.add(layerWeights);
 
-            // Initialize bias vector for current hidden layer
-            double[] layerBiases = new double[currentLayerNeurons];
-            for (int j = 0; j < currentLayerNeurons; j++) {
-                layerBiases[j] = random.nextDouble() * (upperBound - lowerBound) + lowerBound;
-            }
-            biases.add(layerBiases);
-
             // Update previousLayerNeurons for next layer
-            previousLayerNeurons = currentLayerNeurons;
+            previousLayerNeurons = currentLayerNeurons + 1;
         }
 
         // Step 2: Initialize weights and biases between last hidden layer and output layer
@@ -68,37 +59,10 @@ public class NeuralNet {
         }
         weights.add(outputWeights);
 
-        // Initialize biases for output layer
-        double[] outputBiases = new double[numOutputs];
-        for (int j = 0; j < numOutputs; j++) {
-            outputBiases[j] = random.nextDouble() * (upperBound - lowerBound) + lowerBound;
-        }
-        biases.add(outputBiases);
     }
 
-    // Method to print weights and biases (for debugging)
-    public void printWeightsAndBiases() {
-        System.out.println("Weights:");
-        for (int i = 0; i < weights.size(); i++) {
-            double[][] layerWeights = weights.get(i);
-            System.out.println("Layer " + i + " Weights:");
-            for (double[] neuronWeights : layerWeights) {
-                for (double weight : neuronWeights) {
-                    System.out.printf("%.4f ", weight);
-                }
-                System.out.println();
-            }
-        }
-
-        System.out.println("\nBiases:");
-        for (int i = 0; i < biases.size(); i++) {
-            double[] layerBiases = biases.get(i);
-            System.out.println("Layer " + i + " Biases:");
-            for (double bias : layerBiases) {
-                System.out.printf("%.4f ", bias);
-            }
-            System.out.println();
-        }
+    public List<double[][]> getWeights (){
+        return weights;
     }
 
     // A method to simulate the forward pass (for completeness)
