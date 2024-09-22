@@ -14,7 +14,6 @@ public class NeuralNet {
     private List<double[][]> weights;        // List of weight matrices between layers
     private List<double[]> biases;           // List of bias vectors for each layer
 
-    // Constructor
     public NeuralNet(int numInputs, List<Integer> hiddenNeurons, int numOutputs, double lowerBound, double upperBound) {
         this.numInputs = numInputs;
         this.numHiddenLayers = hiddenNeurons.size();
@@ -102,5 +101,12 @@ public class NeuralNet {
         }
     }
 
-    // Additional methods like forward pass, backpropagation, etc. would go here
+    // A method to simulate the forward pass (for completeness)
+    public List<Double> forward(List<Double> inputs) {
+        // Placeholder: Implement the forward pass logic if not done yet
+        return new ArrayList<>();  // Return dummy output for now
+    }
+
 }
+
+
