@@ -8,7 +8,7 @@ public class Main {
 
     public static void main(String[] args) {
         try {
-            int totalTrials = 1;
+            int totalTrials = 10;
             List<Integer> epochCounts = new ArrayList<>();
             NeuralNet lastNN = null;
             for (int trial = 1; trial <= totalTrials; trial++){
