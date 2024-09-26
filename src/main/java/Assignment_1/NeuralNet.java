@@ -5,14 +5,14 @@ import java.util.List;
 import java.util.Random;
 
 public class NeuralNet {
-    private int numInputs;                   // Number of input neurons
-    private int numHiddenLayers;             // Number of hidden layers
-    private List<Integer> hiddenNeurons;     // List containing number of neurons in each hidden layer
-    private int numOutputs;                  // Number of output neurons
-    private double lowerBound;               // Lower bound for random weight initialization
-    private double upperBound;               // Upper bound for random weight initialization
-    private List<double[][]> weights;        // List of weight matrices between layers
-    private double[] biases;                 // **One bias per layer** (adjusted)
+    private int numInputs;
+    private int numHiddenLayers;
+    private List<Integer> hiddenNeurons;
+    private int numOutputs;
+    private double lowerBound;
+    private double upperBound;
+    private List<double[][]> weights;
+    private double[] biases;
     private double learningRate;
     private List<double[]> trainingInputs;
     private List<double[]> trainingOutputs;
@@ -31,7 +31,6 @@ public class NeuralNet {
         this.learningRate = learningRate;
         this.epochErrors = new ArrayList<>();
 
-        // Initialize weights and biases
         initializeBiases();
         initializeWeights();
     }
@@ -42,18 +41,15 @@ public class NeuralNet {
         }
     }
 
-    // Method to initialize weights and biases
     private void initializeWeights() {
         Random random = new Random();
 
-        // Step 1: Initialize weights between input layer and first hidden layer
         int previousLayerNeurons = numInputs;
 
-        // Loop through each hidden layer
         for (int i = 0; i < numHiddenLayers; i++) {
             int currentLayerNeurons = hiddenNeurons.get(i);
 
-            // Initialize weight matrix between previous layer and current hidden layer
+            // weight matrix num curr layer neurons x num prev layer neurons
             double[][] layerWeights = new double[currentLayerNeurons][previousLayerNeurons];
             for (int j = 0; j < currentLayerNeurons; j++) {
                 for (int k = 0; k < previousLayerNeurons; k++) {
@@ -62,11 +58,10 @@ public class NeuralNet {
             }
             weights.add(layerWeights);
 
-            // Update previousLayerNeurons for the next layer
             previousLayerNeurons = currentLayerNeurons;
         }
 
-        // Step 2: Initialize weights between the last hidden layer and output layer
+        // For last layer and output:
         double[][] outputWeights = new double[numOutputs][previousLayerNeurons];
         for (int j = 0; j < numOutputs; j++) {
             for (int k = 0; k < previousLayerNeurons; k++) {
@@ -76,13 +71,11 @@ public class NeuralNet {
         weights.add(outputWeights);
     }
 
-    // Set the training data
     public void setTrainingData(List<double[]> inputs, List<double[]> outputs) {
         this.trainingInputs = inputs;
         this.trainingOutputs = outputs;
     }
 
-    // Sigmoid activation function
     private double sigmoid(double x) {
         return 1.0 / (1.0 + Math.exp(-x));
     }
@@ -94,69 +87,58 @@ public class NeuralNet {
     private double calculateTotalError(double[] output, double[] expectedOutput) {
         double totalError = 0;
         for (int i = 0; i < output.length; i++) {
-            double error = expectedOutput[i] - output[i];  // Difference between expected and predicted
-            totalError += error * error;  // Square the difference
+            double error = expectedOutput[i] - output[i];
+            totalError += error * error;
         }
-        return totalError;  // Sum of squared errors
+        return totalError;
     }
 
     public double[] forwardPropagation(double[] input) {
-        double[] currentInput = input; // The input for the first layer is the initial input
+        double[] currentInput = input;
 
-        // Iterate through each layer
         for (int layer = 0; layer < weights.size(); layer++) {
-            double[][] layerWeights = weights.get(layer);  // Get the weights for the current layer
-            double[] newInput = new double[layerWeights.length]; // This will store the outputs for this layer
+            double[][] layerWeights = weights.get(layer);
+            double[] newInput = new double[layerWeights.length];
 
-            // Calculate the output for each neuron in the layer
             for (int neuron = 0; neuron < layerWeights.length; neuron++) {
                 double weightedSum = 0;
 
-                // Calculate weighted sum: w1*x1 + w2*x2 + ... + bias (bias added once per layer)
                 for (int previousNeuron = 0; previousNeuron < currentInput.length; previousNeuron++) {
                     weightedSum += currentInput[previousNeuron] * layerWeights[neuron][previousNeuron];
                 }
 
-                // Apply the bias for this layer uniformly to all neurons
                 weightedSum += biases[layer];
 
-                // Apply sigmoid activation
                 newInput[neuron] = sigmoid(weightedSum);
             }
 
-            // The output of this layer becomes the input for the next layer
             currentInput = newInput;
         }
 
-        // Return the final output (from the last layer, i.e., the output layer)
         return currentInput;
     }
 
     public void backPropagation(double[] input, double[] expectedOutput) {
-        double[] currentInput = input;  // Store the input to start propagation
-        List<double[]> layerOutputs = new ArrayList<>(); // Store all layer outputs during forward pass
+        double[] currentInput = input;
+        List<double[]> layerOutputs = new ArrayList<>();
 
         // 1. Forward pass
-        layerOutputs.add(currentInput); // Add the initial input as the first "layer output"
+        layerOutputs.add(currentInput);
         for (int layer = 0; layer < weights.size(); layer++) {
-            double[][] layerWeights = weights.get(layer);  // Get the weights for the current layer
-            double[] newInput = new double[layerWeights.length]; // This will store the outputs for this layer
+            double[][] layerWeights = weights.get(layer);
+            double[] newInput = new double[layerWeights.length];
 
-            // Calculate the output for each neuron in the layer
             for (int neuron = 0; neuron < layerWeights.length; neuron++) {
                 double weightedSum = 0;
                 for (int previousNeuron = 0; previousNeuron < currentInput.length; previousNeuron++) {
                     weightedSum += currentInput[previousNeuron] * layerWeights[neuron][previousNeuron];
                 }
 
-                // Apply the bias for this layer uniformly to all neurons
                 weightedSum += biases[layer];
 
-                // Apply sigmoid activation
                 newInput[neuron] = sigmoid(weightedSum);
             }
 
-            // Store the output of this layer and move to the next
             layerOutputs.add(newInput);
             currentInput = newInput;
         }
@@ -168,7 +150,7 @@ public class NeuralNet {
             outputError[i] = expectedOutput[i] - finalOutput[i]; // Total Difference Error
         }
 
-        // 3. Backpropagation: Update weights and biases layer by layer
+        // 3. Backpropagation:
         for (int layer = weights.size() - 1; layer >= 0; layer--) {
             double[] currentLayerOutput = layerOutputs.get(layer + 1); // Output of current layer
             double[] previousLayerOutput = layerOutputs.get(layer); // Output of previous layer (or input for layer 0)
@@ -181,15 +163,14 @@ public class NeuralNet {
 
                 // Update weights for the current neuron
                 for (int prevNeuron = 0; prevNeuron < previousLayerOutput.length; prevNeuron++) {
-                    weights.get(layer)[neuron][prevNeuron] += learningRate * delta * previousLayerOutput[prevNeuron]; // w = w + η * delta * input
+                    weights.get(layer)[neuron][prevNeuron] += learningRate * delta * previousLayerOutput[prevNeuron];
                 }
             }
 
             // Update the bias for the entire layer uniformly
-            biases[layer] += learningRate * sum(layerDelta); // Sum the deltas for the bias update
+            biases[layer] += learningRate * sum(layerDelta);
 
-            // Compute the error for the previous layer to propagate backward
-            if (layer > 0) { // No need to propagate error beyond input layer
+            if (layer > 0) {
                 double[] previousError = new double[previousLayerOutput.length];
                 for (int prevNeuron = 0; prevNeuron < previousLayerOutput.length; prevNeuron++) {
                     double errorSum = 0;
@@ -198,7 +179,7 @@ public class NeuralNet {
                     }
                     previousError[prevNeuron] = errorSum;
                 }
-                outputError = previousError; // Propagate this error to the next layer
+                outputError = previousError;
             }
         }
     }
@@ -211,24 +192,30 @@ public class NeuralNet {
         return total;
     }
 
-    public void trainUntilConverged(double[] input, double[] expectedOutput, double threshold) {
+    public int trainUntilConverged(double threshold) {
         double totalError;
         int iterations = 0;
 
         do {
-            forwardPropagation(input);  // Forward propagate to get current output
-            backPropagation(input, expectedOutput);  // Perform backpropagation and update weights
-            totalError = calculateTotalError(forwardPropagation(input), expectedOutput);  // Recalculate error
-            iterations++;
-            System.out.println("Iteration " + iterations + ": Total Error = " + totalError);
+            totalError = 0;
+            for (int i = 0; i < trainingInputs.size(); i++) {
+                double[] input = trainingInputs.get(i);
+                double[] expectedOutput = trainingOutputs.get(i);
 
-            // Track error at this epoch
+                forwardPropagation(input);
+                backPropagation(input, expectedOutput);
+                totalError += calculateTotalError(forwardPropagation(input), expectedOutput);
+            }
+
             epochErrors.add(totalError);
+            iterations++;
+            System.out.println("Epoch " + iterations + ": Total Error = " + totalError);
 
-        } while (totalError >= threshold);  // Continue until total error is below the threshold
+        } while (totalError >= threshold && iterations <=6000); //REMEMBER TO GET RID OF THE ITERATIONS THINGY JUST HERE FOR DEBUG
+
+        return iterations;
     }
 
-    // Method to return the list of errors for plotting
     public List<Double> getEpochErrors() {
         return epochErrors;
     }
