@@ -9,11 +9,13 @@ public class Main {
     public static void main(String[] args) {
         try {
             int totalTrials = 10;
+//            String fileName = "C:\\Users\\panch\\IdeaProjects\\CPEN502A1\\src\\main\\resources\\binary.csv";
+            String fileName = "C:\\Users\\panch\\IdeaProjects\\CPEN502A1\\src\\main\\resources\\bipolar.csv";
             List<Integer> epochCounts = new ArrayList<>();
             NeuralNet lastNN = null;
             for (int trial = 1; trial <= totalTrials; trial++){
 //                System.out.println("Trial" + trial);
-                NeuralNet nn = DataLoader.loadNeuralNetFromCSV("C:\\Users\\panch\\IdeaProjects\\CPEN502A1\\src\\main\\resources\\binary.csv");
+                NeuralNet nn = DataLoader.loadNeuralNetFromCSV(fileName);
 
                 int epochs = nn.trainUntilConverged(0.05);
                 epochCounts.add(epochs);
