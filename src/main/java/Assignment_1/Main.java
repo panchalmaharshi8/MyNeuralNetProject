@@ -8,7 +8,7 @@ public class Main {
 
     public static void main(String[] args) {
         try {
-            int totalTrials = 10;
+            int totalTrials = 50;
 //            String fileName = "C:\\Users\\panch\\IdeaProjects\\CPEN502A1\\src\\main\\resources\\binary.csv";
             String fileName = "C:\\Users\\panch\\IdeaProjects\\CPEN502A1\\src\\main\\resources\\bipolar.csv";
             List<Integer> epochCounts = new ArrayList<>();

@@ -43,7 +43,7 @@ public class DataLoader {
         }
         br.close();
 
-        NeuralNet neuralNet = new NeuralNet(numInputs, hiddenNeurons, numOutputs, -0.5, 0.5, 0.2);
+        NeuralNet neuralNet = new NeuralNet(numInputs, hiddenNeurons, numOutputs, -0.5, 0.5, 0.02);
         neuralNet.setTrainingData(inputs, outputs);
         return neuralNet;
     }
