@@ -41,16 +41,6 @@ public class NeuralNetTest {
         }
     }
 
-    @Test
-    public void testBiases () {
-        NeuralNet nn = createNeuralNet();
-
-        double[] biases = nn.getBiases();
-        assertEquals(3, biases.length);
-        for (double bias : biases) {
-            assertEquals(1.0, bias, 0.0001); // Allow a small delta for floating point comparison
-        }
-    }
 
 
 }

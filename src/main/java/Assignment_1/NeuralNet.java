@@ -381,6 +381,10 @@ public class NeuralNet {
     public List<Double> getEpochErrors() {
         return epochErrors;
     }
+
+    public List<double[][]> getWeights() {
+        return weights;
+    }
 }
 
 
