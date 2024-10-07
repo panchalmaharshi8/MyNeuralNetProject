@@ -34,37 +34,6 @@ public class NeuralNet {
         initializeWeights();
     }
 
-//    // Initialize weights
-//    private void initializeWeights() {
-//        Random random = new Random();
-//
-//        int previousLayerNeurons = numInputs;
-//
-//        for (int i = 0; i < numHiddenLayers; i++) {
-//            int currentLayerNeurons = hiddenNeurons.get(i);
-//
-//            // weight matrix: num curr layer neurons x (num prev layer neurons + 1 for bias)
-//            double[][] layerWeights = new double[currentLayerNeurons][previousLayerNeurons];
-//            for (int j = 0; j < currentLayerNeurons; j++) {
-//                for (int k = 0; k < previousLayerNeurons; k++) {
-//                    layerWeights[j][k] = random.nextDouble() * (upperBound - lowerBound) + lowerBound;
-//                }
-//            }
-//            weights.add(layerWeights);
-//
-//            previousLayerNeurons = currentLayerNeurons + 1;  // +1 for the bias input in the next layer
-//        }
-//
-//        // For last layer and output:
-//        double[][] outputWeights = new double[numOutputs][previousLayerNeurons];
-//        for (int j = 0; j < numOutputs; j++) {
-//            for (int k = 0; k < previousLayerNeurons; k++) {
-//                outputWeights[j][k] = random.nextDouble() * (upperBound - lowerBound) + lowerBound;
-//            }
-//        }
-//        weights.add(outputWeights);
-//    }
-
     private void initializeWeights() {
         Random random = new Random();
 
@@ -83,13 +52,13 @@ public class NeuralNet {
                 }
             }
             weights.add(layerWeights);
-            previousWeightUpdates.add(layerPreviousUpdates);  // Add the corresponding previous weight updates
+            previousWeightUpdates.add(layerPreviousUpdates);  // Add the previous weight updates respectively
             previousLayerNeurons = currentLayerNeurons + 1;  // +1 for the bias input in the next layer
         }
 
         // For the last layer and output:
         double[][] outputWeights = new double[numOutputs][previousLayerNeurons];
-        double[][] outputPreviousUpdates = new double[numOutputs][previousLayerNeurons];  // For momentum
+        double[][] outputPreviousUpdates = new double[numOutputs][previousLayerNeurons];  // Adding for momentum
         for (int j = 0; j < numOutputs; j++) {
             for (int k = 0; k < previousLayerNeurons; k++) {
                 outputWeights[j][k] = random.nextDouble() * (upperBound - lowerBound) + lowerBound;
@@ -105,20 +74,23 @@ public class NeuralNet {
         this.trainingOutputs = outputs;
     }
 
+    //Unused at the moment, tanh for bipolar
     private double sigmoid(double x) {
         return 1.0 / (1.0 + Math.exp(-x));
     }
 
+    //Always feeding in the sigmoid(x) as x here!
     private double sigmoidDerivative(double x) {
-        return x * (1 - x);
+        return x*(1-x);
     }
 
+    //Use this for bipolar!
     private double tanh(double x) {
         return Math.tanh(x);
     }
 
     private double tanhDerivative(double x) {
-        return 1 - Math.pow(Math.tanh(x), 2);  // Derivative of tanh
+        return 1 - Math.pow(Math.tanh(x), 2);
     }
 
     private double calculateTotalError(double[] output, double[] expectedOutput) {
@@ -153,9 +125,9 @@ public class NeuralNet {
                 // Apply sigmoid activation
                 newInput[neuron] = tanh(weightedSum);
 
-                // Check if activations are too close to 0 or 1
+                // Check if neurons are too saturated
                 if (newInput[neuron] < 0.1 || newInput[neuron] > 0.9) {
-                    System.out.println("Neuron " + neuron + " in Layer " + layer + " is saturated with activation: " + newInput[neuron]);
+//                    System.out.println("Neuron " + neuron + " in Layer " + layer + " is saturated with activation: " + newInput[neuron]);
                 }
             }
 
@@ -352,8 +324,6 @@ public class NeuralNet {
         }
     }
 
-
-
     public int trainUntilConverged(double threshold) {
         double totalError;
         int iterations = 0;
@@ -386,71 +356,3 @@ public class NeuralNet {
         return weights;
     }
 }
-
-
-//    public void backPropagation(double[] input, double[] expectedOutput) {
-//        double[] currentInput = new double[input.length + 1];
-//        System.arraycopy(input, 0, currentInput, 0, input.length);
-//        currentInput[input.length] = 1.0;  // Bias input
-//
-//        List<double[]> layerOutputs = new ArrayList<>();
-//        layerOutputs.add(currentInput);
-//
-//        // Forward pass
-//        for (int layer = 0; layer < weights.size(); layer++) {
-//            double[][] layerWeights = weights.get(layer);
-//            double[] newInput = new double[layerWeights.length];
-//
-//            for (int neuron = 0; neuron < layerWeights.length; neuron++) {
-//                double weightedSum = 0;
-//                for (int previousNeuron = 0; previousNeuron < currentInput.length; previousNeuron++) {
-//                    weightedSum += currentInput[previousNeuron] * layerWeights[neuron][previousNeuron];
-//                }
-//
-//                newInput[neuron] = sigmoid(weightedSum);
-//            }
-//
-//            currentInput = new double[newInput.length + 1];
-//            System.arraycopy(newInput, 0, currentInput, 0, newInput.length);
-//            currentInput[newInput.length] = 1.0;  // Bias input
-//            layerOutputs.add(currentInput);
-//        }
-//
-//        // Compute output error
-//        double[] outputError = new double[expectedOutput.length];
-//        double[] finalOutput = layerOutputs.get(layerOutputs.size() - 1);  // Last layer output
-//
-//        for (int i = 0; i < expectedOutput.length; i++) {
-//            outputError[i] = expectedOutput[i] - finalOutput[i];
-//        }
-//
-//        // Backpropagation
-//        for (int layer = weights.size() - 1; layer >= 0; layer--) {
-//            double[] currentLayerOutput = layerOutputs.get(layer + 1);
-//            double[] previousLayerOutput = layerOutputs.get(layer);
-//            double[] layerDelta = new double[currentLayerOutput.length];
-//
-//            for (int neuron = 0; neuron < currentLayerOutput.length - 1; neuron++) {  // Ignore bias neuron
-//                double delta = outputError[neuron] * sigmoidDerivative(currentLayerOutput[neuron]);
-//                layerDelta[neuron] = delta;
-//
-//                // Update weights for the current neuron
-//                for (int prevNeuron = 0; prevNeuron < previousLayerOutput.length; prevNeuron++) {
-//                    weights.get(layer)[neuron][prevNeuron] += learningRate * delta * previousLayerOutput[prevNeuron];
-//                }
-//            }
-//
-//            // Propagate error to the previous layer
-//            if (layer > 0) {
-//                double[] previousError = new double[previousLayerOutput.length - 1];
-//                for (int prevNeuron = 0; prevNeuron < previousLayerOutput.length - 1; prevNeuron++) {
-//                    double errorSum = 0;
-//                    for (int neuron = 0; neuron < currentLayerOutput.length - 1; neuron++) {
-//                        errorSum += layerDelta[neuron] * weights.get(layer)[neuron][prevNeuron];
-//                    }
-//                    previousError[prevNeuron] = errorSum;
-//                }
-//                outputError = previousError;
-//            }
-//        }
-//    }
